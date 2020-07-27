@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS homebl_users CASCADE;
