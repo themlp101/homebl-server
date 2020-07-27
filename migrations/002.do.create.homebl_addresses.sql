@@ -5,7 +5,7 @@ CREATE TABLE homebl_addresses (
   address_3 VARCHAR(120),
   city VARCHAR(100) NOT NULL,
   state CHAR(2) NOT NULL,
-  zip_code VARCHAR(16) NOT NULL
-  note_id INTEGER REFERENCES homebl_notes(id)
+  zip_code VARCHAR(16) NOT NULL,
+  user_id INTEGER REFERENCES homebl_users(id)
     ON DELETE CASCADE
 );

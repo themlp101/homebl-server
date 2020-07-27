@@ -9,7 +9,7 @@
 		"deploy": "git push heroku master",
 		"test": "mocha --require test/setup.js",
 		"dev": "nodemon src/server.js",
-		"migrate": "postgator --config postgrator-config.js",
+		"migrate": "postgrator --config postgrator-config.js",
 		"migrate:test": "env NODE_ENV=test npm run migrate"
 	},
 	"keywords": [],
@@ -24,7 +24,7 @@
 		"jsonwebtoken": "^8.5.1",
 		"knex": "^0.21.2",
 		"morgan": "^1.10.0",
-		"pg": "^8.3.0",
+		"pg": "^7.12.0",
 		"uuid": "^8.2.0",
 		"winston": "^3.3.3",
 		"xss": "^1.0.8"
