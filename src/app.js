@@ -6,15 +6,24 @@ const helmet = require('helmet')
 
 const { NODE_ENV } = require('./config')
 const logger = require('./logger')
+const authRouter = require('./auth/auth-router')
 
 const app = express()
 
 const morganOption = NODE_ENV === 'production' ? 'tiny' : 'common'
 
+app.use(
+	morgan(NODE_ENV === 'production' ? 'tiny' : 'common', {
+		skip: () => NODE_ENV === 'test',
+	})
+)
+
 app.use(morgan(morganOption))
 app.use(express.json())
 app.use(cors())
 app.use(helmet())
+
+app.use(`/api/auth`, authRouter)
 
 // app.use(function validateBearerToken(req, res, next) {
 // 	const apiToken = process.env.API_TOKEN

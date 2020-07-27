@@ -8,9 +8,9 @@ TRUNCATE
 
 INSERT INTO homebl_users (user_name, full_name, password)
 VALUES  
-  ('matty', 'Matt Patterson', 'password1234'),
-  ('test_user1', 'Test User1', 'password'),
-  ('test_user2', 'Test User2', 'password');
+  ('matty', 'Matt Patterson', '$2a$04$YIuSCcrI1/kvEtB4clrnkenQjjKIeRSuKPJr2kZCJixZ8owkJHZGK'),
+  ('test_user1', 'Test User1', '$2a$04$ny/a3HZkjpcekK07mOt2H.9I9aRnFwD2aeIZClEhLvtlJVhxjOOiK'),
+  ('test_user2', 'Test User2', '$2a$04$QrJB.UZB1TtLHm2QJ/8ZJuimRIzDT2xMoYUMAvmMV5F491dHcuusO');
 
 INSERT INTO homebl_addresses (address_1, address_2, address_3, city, state, zip_code, user_id )
 VALUES
