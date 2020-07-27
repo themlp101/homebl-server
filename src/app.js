@@ -7,6 +7,7 @@ const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
 const logger = require('./logger')
 const authRouter = require('./auth/auth-router')
+const addressRouter = require('./addresses/address-router')
 
 const app = express()
 
@@ -24,6 +25,7 @@ app.use(cors())
 app.use(helmet())
 
 app.use(`/api/auth`, authRouter)
+app.use(`/api/address`, addressRouter)
 
 // app.use(function validateBearerToken(req, res, next) {
 // 	const apiToken = process.env.API_TOKEN

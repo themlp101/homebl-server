@@ -25,7 +25,7 @@ function makeUsersArray() {
 		},
 	]
 }
-function makeAddressesArray() {
+function makeAddressesArray(users) {
 	return [
 		{
 			id: 1,
@@ -35,7 +35,7 @@ function makeAddressesArray() {
 			city: 'Denver',
 			state: 'CO',
 			zip_code: '80014',
-			user_id: 1,
+			user_id: users[0].id,
 		},
 		{
 			id: 2,
@@ -45,78 +45,56 @@ function makeAddressesArray() {
 			city: 'Denver',
 			state: 'CO',
 			zip_code: '80019',
-			user_id: 1,
+			user_id: users[0].id,
 		},
 		{
-			id: 2,
+			id: 3,
 			address_1: '1625 Cedar Brook Avenue',
 			address_2: null,
 			address_3: null,
 			city: 'Denver',
 			state: 'CO',
 			zip_code: '80019',
-			user_id: 2,
+			user_id: users[1].id,
 		},
 		{
-			id: 3,
+			id: 4,
 			address_1: '452 Amelia Lane',
 			address_2: null,
 			address_3: null,
 			city: 'Denver',
 			state: 'CO',
 			zip_code: '80019',
-			user_id: 3,
+			user_id: users[2].id,
 		},
 	]
 }
-function makeExpectedAddress(users, address, notes = []) {
-	const user = users.find((user) => user.id === address.user_id)
-	const numOfNotes = notes.filter(
-		(note) => note.address_id === address.id
-	).length
-	const {
-		id,
-		address_1,
-		address_2,
-		address_3,
-		city,
-		state,
-		zip_code,
-		user_id,
-	} = address
-	return {
-		id,
-		address_1,
-		address_2,
-		address_3,
-		city,
-		state,
-		zip_code,
-		user_id,
-	}
+
+function makeExpectedAddresses(id, addresses, notes = []) {
+	return addresses.filter((address) => address.user_id === id)
 }
-function makeNotesArray() {
+function makeNotesArray(addresses) {
 	return [
 		{
 			id: 1,
 			content:
 				'Check schedule to view, I love the backyard for the kids',
-			address_id: 1,
+			address_id: addresses[0].id,
 		},
 		{
 			id: 2,
 			content: 'See this today -- check with realtor Bob',
-			address_id: 1,
+			address_id: addresses[1].id,
 		},
 		{
 			id: 3,
 			content: 'Interested if prices was lower',
-			address_id: 2,
+			address_id: addresses[2].id,
 		},
 		{
 			id: 4,
 			content: 'I need to find out if my furniture will fit!',
-			address_id: 3,
+			address_id: addresses[3].id,
 		},
 	]
 }
@@ -152,20 +130,12 @@ function seedUsers(db, users) {
 		)
 }
 function seedAddressesTable(db, users, addresses, notes = []) {
-	return db.transaction(async (trx) => {
-		await seedUsers(trx, users)
-		await trx.into('homebl_addresses').insert(addresses)
-		await trx.raw(`SELECT setval('homebl_addresses_iq_seq', ?)`, [
-			addresses[addresses.length - 1].id,
-		])
-
-		if (notes.length) {
-			await trx.into('homebl_notes').insert(notes)
-			await trx.raw(`SELECT setval ('homebl_notes_id_seq',?)`, [
-				notes[notes.length - 1].id,
-			])
-		}
-	})
+	return seedUsers(db, users)
+		.then(() => db.into('homebl_addresses').insert(addresses))
+		.then(
+			() =>
+				notes.length && db.into('homebl_notes').insert(notes)
+		)
 }
 function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
 	const token = jwt.sign({ user_id: `${user.id}` }, secret, {
@@ -177,15 +147,15 @@ function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
 }
 function exMachinaFictures() {
 	const testUsers = makeUsersArray()
-	const testAddress = makeAddressesArray()
-	const testNotes = makeNotesArray()
-	return { testUsers, testAddress, testNotes }
+	const testAddresses = makeAddressesArray(testUsers)
+	const testNotes = makeNotesArray(testAddresses)
+	return { testUsers, testAddresses, testNotes }
 }
 
 module.exports = {
 	makeUsersArray,
 	makeAddressesArray,
-	makeExpectedAddress,
+	makeExpectedAddresses,
 	makeNotesArray,
 	makeExpectedNotes,
 

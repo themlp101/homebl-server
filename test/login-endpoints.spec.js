@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken')
 const supertest = require('supertest')
 const helpers = require('./helpers/test-helpers')
 
-describe.only('Login/Auth endpoints', () => {
+describe('Login/Auth endpoints', () => {
 	let db
 
 	const { testUsers } = helpers.exMachinaFictures()
@@ -66,6 +66,24 @@ describe.only('Login/Auth endpoints', () => {
 				.expect(400, {
 					error: `Incorrect username or password`,
 				})
+		})
+		it('should resoind 200 when using valid credentials', () => {
+			const validUser = {
+				user_name: testUser.user_name,
+				password: testUser.password,
+			}
+			const expectedToken = jwt.sign(
+				{ user_id: testUser.id }, // payload
+				process.env.JWT_SECRET,
+				{
+					subject: testUser.user_name,
+					algorithm: 'HS256',
+				}
+			)
+			return supertest(app)
+				.post(`/api/auth/login`)
+				.send(validUser)
+				.expect(200, { authToken: expectedToken })
 		})
 	})
 })
