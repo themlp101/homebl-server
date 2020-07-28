@@ -84,29 +84,25 @@ function makeNotesArray(addresses) {
 		{
 			id: 2,
 			content: 'See this today -- check with realtor Bob',
-			address_id: addresses[1].id,
+			address_id: addresses[0].id,
 		},
 		{
 			id: 3,
 			content: 'Interested if prices was lower',
-			address_id: addresses[2].id,
+			address_id: addresses[0].id,
 		},
 		{
 			id: 4,
 			content: 'I need to find out if my furniture will fit!',
-			address_id: addresses[3].id,
+			address_id: addresses[1].id,
 		},
 	]
 }
-function makeExpectedNotes(addressID, notes) {
+function makeExpectedNotes(addressID, notes = []) {
 	const expectedNotes = notes.filter(
 		(note) => note.address_id === addressID
 	)
-	return expectedNotes.map((note) => ({
-		id: note.id,
-		content: note.content,
-		address_id: note.address_id,
-	}))
+	return expectedNotes
 }
 function cleanTables(db) {
 	return db.transaction((transaction) =>

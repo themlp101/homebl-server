@@ -2,9 +2,8 @@ const knex = require('knex')
 const app = require('../src/app')
 const helpers = require('./helpers/test-helpers')
 const supertest = require('supertest')
-const { makeExpectedAddress } = require('./helpers/test-helpers')
 
-describe.only('Addressess Endpoint', () => {
+describe('Addressess Endpoint', () => {
 	let db
 
 	const {
@@ -113,6 +112,61 @@ describe.only('Addressess Endpoint', () => {
 						helpers.makeAuthHeader(testUsers[0])
 					)
 					.expect(200, expectedAddress)
+			})
+		})
+	})
+	describe('GET /api/address/:address_id/notes', () => {
+		context('Given no notes', () => {
+			beforeEach(() => {
+				helpers.seedUsers(db, testUsers)
+			})
+			it('should respond 404 "No notes found"', () => {
+				const id = 99909
+				return supertest(app)
+					.get(`/api/address/${id}/notes`)
+					.set(
+						'Authorization',
+						helpers.makeAuthHeader(testUsers[0])
+					)
+					.expect(404, {
+						error: `Address with id:${id} not found`,
+					})
+			})
+		})
+		context('Given notes in the database', () => {
+			beforeEach(() =>
+				helpers.seedAddressesTable(
+					db,
+					testUsers,
+					testAddresses,
+					testNotes
+				)
+			)
+			it('should respond with 404 "Address does not exist"', () => {
+				const address_id = 99099
+				return supertest(app)
+					.get(`/api/address/${address_id}/notes/`)
+					.set(
+						'Authorization',
+						helpers.makeAuthHeader(testUsers[0])
+					)
+					.expect(404, {
+						error: `Address with id:${address_id} not found`,
+					})
+			})
+			it('should respond 200 and the notes for the address', () => {
+				const { id } = testAddresses[0]
+				const expectedNotes = helpers.makeExpectedNotes(
+					id,
+					testNotes
+				)
+				return supertest(app)
+					.get(`/api/address/${id}/notes`)
+					.set(
+						'Authorization',
+						helpers.makeAuthHeader(testUsers[0])
+					)
+					.expect(200, expectedNotes)
 			})
 		})
 	})

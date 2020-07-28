@@ -51,4 +51,20 @@ addressRouter
 		res.json(res.address)
 	})
 
+addressRouter
+	.route(`/:address_id/notes/`)
+	.all(requireAuth)
+	.all(checkIfAddressExists)
+	.get(async (req, res, next) => {
+		try {
+			const { address_id } = req.params
+			const notes = await AddressServices.getNotes(
+				req.app.get('db'),
+				address_id
+			)
+			res.json(notes)
+		} catch (error) {
+			next(error)
+		}
+	})
 module.exports = addressRouter
