@@ -63,7 +63,7 @@ describe('Addressess Endpoint', () => {
 			})
 		})
 	})
-	describe.only('GET /api/address/:address_id', () => {
+	describe('GET /api/address/:address_id', () => {
 		context('Given no addresses', () => {
 			beforeEach(() => {
 				helpers.seedUsers(db, testUsers)
@@ -179,7 +179,6 @@ describe('Addressess Endpoint', () => {
 					address_1,
 					state,
 					zip_code,
-					user_id,
 					city,
 				} = testAddresses[0]
 				return supertest(app)
@@ -192,7 +191,6 @@ describe('Addressess Endpoint', () => {
 						address_1,
 						state,
 						zip_code,
-						user_id,
 						city,
 					})
 					.expect(201)
@@ -326,15 +324,15 @@ describe('Addressess Endpoint', () => {
 					helpers.makeAuthHeader(testUsers[0])
 				)
 				.expect(204)
-			// .then(() =>
-			// 	supertest(app)
-			// 		.get(`/api/address/`)
-			// 		.set(
-			// 			'authorization',
-			// 			helpers.makeAuthHeader(testUsers[0])
-			// 		)
-			// 		.expect(expectedAddresses)
-			// )
+				.then(() =>
+					supertest(app)
+						.get(`/api/address/`)
+						.set(
+							'authorization',
+							helpers.makeAuthHeader(testUsers[0])
+						)
+						.expect(expectedAddresses)
+				)
 		})
 	})
 })
