@@ -12,6 +12,9 @@ const AddressServices = {
 			.select()
 			.where('address_id', addressID)
 	},
+	getNoteById: (db, id) => {
+		return db('homebl_notes').where({ id }).first()
+	},
 	postAddress: (db, newAddress) => {
 		return db('homebl_addresses')
 			.insert(newAddress)
@@ -20,6 +23,16 @@ const AddressServices = {
 			.then((address) =>
 				AddressServices.getAddressById(db, address.id)
 			)
+	},
+	postNote: (db, newNote) => {
+		return db('homebl_notes')
+			.insert(newNote)
+			.returning('*')
+			.then(([note]) => note)
+			.then((note) => AddressServices.getNoteById(db, note.id))
+	},
+	deleteAddress: (db, id) => {
+		return db('homebl_addresses').where({ id }).delete()
 	},
 }
 

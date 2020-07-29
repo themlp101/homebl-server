@@ -2,8 +2,6 @@ const knex = require('knex')
 const app = require('../src/app')
 const helpers = require('./helpers/test-helpers')
 const supertest = require('supertest')
-const { help } = require('../src/logger')
-const { expect } = require('chai')
 
 describe('Addressess Endpoint', () => {
 	let db
@@ -122,9 +120,9 @@ describe('Addressess Endpoint', () => {
 			beforeEach(() => {
 				helpers.seedUsers(db, testUsers)
 			})
-			it('should respond 404 "No notes found"', () => {
+			it('should respond 404 "No notes found"', async () => {
 				const id = 99909
-				return supertest(app)
+				await supertest(app)
 					.get(`/api/address/${id}/notes`)
 					.set(
 						'Authorization',
@@ -173,7 +171,7 @@ describe('Addressess Endpoint', () => {
 		})
 	})
 
-	describe.only('POST /api/address', () => {
+	describe('POST /api/address', () => {
 		describe('Given no addresses', () => {
 			beforeEach(() => helpers.seedUsers(db, testUsers))
 			it('should respond 200 and address posted', () => {
@@ -217,14 +215,12 @@ describe('Addressess Endpoint', () => {
 							})
 					)
 			})
-
 			const requiredFields = [
 				'address_1',
 				'city',
 				'state',
 				'zip_code',
 			]
-
 			requiredFields.forEach((field) => {
 				const newAddress = {
 					address_1: '1234 Test Avenue',
@@ -247,6 +243,96 @@ describe('Addressess Endpoint', () => {
 						})
 				})
 			})
+		})
+	})
+	describe('POST /api/address/:address_id/notes', () => {
+		beforeEach(() =>
+			helpers.seedAddressesTable(db, testUsers, testAddresses)
+		)
+
+		it('should create a note, responding with 201 and the note', () => {
+			const { content } = testNotes[0]
+			const { id } = testAddresses[0]
+			return supertest(app)
+				.post(`/api/address/${id}/notes`)
+				.set(
+					'Authorization',
+					helpers.makeAuthHeader(testUsers[0])
+				)
+				.send({
+					content,
+				})
+				.expect(201)
+				.expect((res) => {
+					expect(res.body).to.have.property('id')
+					expect(res.headers.location).to.eql(
+						`/api/address/${id}/notes/${res.body.id}`
+					)
+				})
+				.expect((res) =>
+					db('homebl_notes')
+						.select('*')
+						.where({ id: 1 })
+						.first()
+						.then((row) => {
+							expect(row.id).to.eql(1)
+							expect(row.address_id).to.eql(
+								testAddresses[0].id
+							)
+						})
+				)
+		})
+		it('should respond 400 when content is empty', () => {
+			return supertest(app)
+				.post(`/api/address/1/notes`)
+				.set(
+					'authorization',
+					helpers.makeAuthHeader(testUsers[0])
+				)
+				.send({ content: '' })
+				.expect(400, { error: `Content is required` })
+		})
+		it('should respond 400 when no content is provided', () => {
+			return supertest(app)
+				.post(`/api/address/1/notes`)
+				.set(
+					'authorization',
+					helpers.makeAuthHeader(testUsers[0])
+				)
+				.send({})
+				.expect(400, { error: `Content is required` })
+		})
+	})
+	describe.only('DELETE /api/address/:address_id', () => {
+		beforeEach(() =>
+			helpers.seedAddressesTable(
+				db,
+				testUsers,
+				testAddresses,
+				testNotes
+			)
+		)
+		it('should respond 204 and the address was deleted', async () => {
+			const { id } = testAddresses[3]
+			const expectedAddresses = testAddresses.filter(
+				(address) =>
+					address.id !== id &&
+					address.user_id === testUsers[0].id
+			)
+			await supertest(app)
+				.delete(`/api/address/${id}`)
+				.set(
+					'authorization',
+					helpers.makeAuthHeader(testUsers[0])
+				)
+				.expect(404)
+			return await supertest(app)
+				.get(`/api/address`)
+				.set(
+					'authorization',
+					helpers.makeAuthHeader(testUsers[0])
+				)
+				.expect(expectedAddresses)
 		})
 	})
 })

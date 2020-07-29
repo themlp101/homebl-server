@@ -4,6 +4,7 @@ const AuthService = require('../auth/auth-service')
 const AddressServices = require('./address-services')
 const authRouter = require('../auth/auth-router')
 const path = require('path')
+const logger = require('../logger')
 const addressRouter = express.Router()
 const jsonParser = express.json()
 
@@ -81,6 +82,7 @@ addressRouter
 					)
 				)
 				.json(postedAddress)
+			next()
 		} catch (error) {
 			next(error.message)
 		}
@@ -90,8 +92,24 @@ addressRouter
 	.route(`/:address_id`)
 	.all(requireAuth)
 	.all(checkIfAddressExists)
-	.get((req, res) => {
+	.get((req, res, next) => {
 		res.json(res.address)
+		next()
+	})
+	.delete(async (req, res, next) => {
+		try {
+			const { address_id } = req.params
+			await AddressServices.deleteAddress(
+				req.app.get('db'),
+				address_id
+			)
+
+			res.status(204)
+			next()
+		} catch (error) {
+			logger.error(error.message)
+			next(error.message)
+		}
 	})
 
 addressRouter
@@ -106,8 +124,41 @@ addressRouter
 				address_id
 			)
 			res.json(notes)
+			next()
 		} catch (error) {
 			next(error)
 		}
 	})
+	.post(async (req, res, next) => {
+		try {
+			const address_id = res.address.id
+			const { content } = req.body
+
+			if (
+				content === null ||
+				content === undefined ||
+				content === ''
+			)
+				return res
+					.status(400)
+					.json({ error: `Content is required` })
+
+			const newNote = { content, address_id }
+			const postedNote = await AddressServices.postNote(
+				req.app.get('db'),
+				newNote
+			)
+			res.status(201)
+				.location(
+					path.posix.join(
+						req.originalUrl,
+						`/${postedNote.id}`
+					)
+				)
+				.json(postedNote)
+		} catch (error) {
+			next(error.message)
+		}
+	})
+
 module.exports = addressRouter
