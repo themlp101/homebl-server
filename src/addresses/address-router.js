@@ -30,7 +30,6 @@ addressRouter
 	.get(async (req, res, next) => {
 		try {
 			const { id } = req.user
-			await AuthService.getUser(req.app.get('db'), id)
 
 			const addresses = await AddressServices.getAddress(
 				req.app.get('db'),
@@ -74,13 +73,10 @@ addressRouter
 			)
 			res.status(201)
 				.location(
-					path.posix.join(
-						req.originalUrl,
-						`/${postedAddress.id}`
-					)
+					`${req.originalUrl}
+						/${postedAddress.id}`
 				)
 				.json(postedAddress)
-			next()
 		} catch (error) {
 			next(error.message)
 		}
@@ -92,7 +88,6 @@ addressRouter
 	.all(checkIfAddressExists)
 	.get((req, res, next) => {
 		res.json(res.address)
-		next()
 	})
 	.delete(async (req, res, next) => {
 		try {
@@ -102,38 +97,40 @@ addressRouter
 				address_id
 			)
 
-			res.status(204)
-			next()
+			res.status(204).send()
 		} catch (error) {
 			next(error.message)
 		}
 	})
 	.patch(async (req, res, next) => {
-		const {
-			address_1,
-			address_2,
-			address_3,
-			city,
-			state,
-			zip_code,
-		} = req.body
-		const { address_id } = req.params
-		const newFields = {
-			address_1,
-			address_2,
-			address_3,
-			city,
-			state,
-			zip_code,
-		}
-		const response = await AddressServices.patchAddress(
-			req.app.get('db'),
-			address_id,
-			newFields
-		)
+		try {
+			const {
+				address_1,
+				address_2,
+				address_3,
+				city,
+				state,
+				zip_code,
+			} = req.body
+			const { address_id } = req.params
+			const newFields = {
+				address_1,
+				address_2,
+				address_3,
+				city,
+				state,
+				zip_code,
+			}
+			const response = await AddressServices.patchAddress(
+				req.app.get('db'),
+				address_id,
+				newFields
+			)
 
-		res.status(201).json(response)
-		next()
+			res.status(201).json(response)
+		} catch (error) {
+			next(error.message)
+		}
 	})
 
 addressRouter
@@ -148,7 +145,6 @@ addressRouter
 				address_id
 			)
 			res.json(notes)
-			next()
 		} catch (error) {
 			next(error)
 		}
