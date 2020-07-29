@@ -12,6 +12,15 @@ const AddressServices = {
 			.select()
 			.where('address_id', addressID)
 	},
+	postAddress: (db, newAddress) => {
+		return db('homebl_addresses')
+			.insert(newAddress)
+			.returning('*')
+			.then(([address]) => address)
+			.then((address) =>
+				AddressServices.getAddressById(db, address.id)
+			)
+	},
 }
 
 module.exports = AddressServices

@@ -3,7 +3,7 @@ const { requireAuth } = require('../middleware/jwt-auth')
 const AuthService = require('../auth/auth-service')
 const AddressServices = require('./address-services')
 const authRouter = require('../auth/auth-router')
-
+const path = require('path')
 const addressRouter = express.Router()
 const jsonParser = express.json()
 
@@ -40,6 +40,49 @@ addressRouter
 			res.json(addresses)
 		} catch (error) {
 			next(error)
+		}
+	})
+	.post(jsonParser, async (req, res, next) => {
+		try {
+			const {
+				address_1,
+				address_2,
+				address_3,
+				city,
+				state,
+				zip_code,
+			} = req.body
+			const newAddress = {
+				address_1,
+				city,
+				state,
+				zip_code,
+			}
+			for (const [key, value] of Object.entries(newAddress))
+				if (value === null || value === undefined)
+					return res.status(400).json({
+						error: `Missing "${key}" in request body`,
+					})
+
+			newAddress.user_id = req.user.id
+			if (address_2 || address_3) {
+				newAddress.address_2 = address_2
+				newAddress.address_3 = address_3
+			}
+			const postedAddress = await AddressServices.postAddress(
+				req.app.get('db'),
+				newAddress
+			)
+			res.status(201)
+				.location(
+					path.posix.join(
+						req.originalUrl,
+						`/${postedAddress.id}`
+					)
+				)
+				.json(postedAddress)
+		} catch (error) {
+			next(error.message)
 		}
 	})
 

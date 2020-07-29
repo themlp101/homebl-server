@@ -2,6 +2,8 @@ const knex = require('knex')
 const app = require('../src/app')
 const helpers = require('./helpers/test-helpers')
 const supertest = require('supertest')
+const { help } = require('../src/logger')
+const { expect } = require('chai')
 
 describe('Addressess Endpoint', () => {
 	let db
@@ -167,6 +169,83 @@ describe('Addressess Endpoint', () => {
 						helpers.makeAuthHeader(testUsers[0])
 					)
 					.expect(200, expectedNotes)
+			})
+		})
+	})
+
+	describe.only('POST /api/address', () => {
+		describe('Given no addresses', () => {
+			beforeEach(() => helpers.seedUsers(db, testUsers))
+			it('should respond 200 and address posted', () => {
+				const {
+					address_1,
+					state,
+					zip_code,
+					user_id,
+					city,
+				} = testAddresses[0]
+				return supertest(app)
+					.post(`/api/address`)
+					.set(
+						'Authorization',
+						helpers.makeAuthHeader(testUsers[0])
+					)
+					.send({
+						address_1,
+						state,
+						zip_code,
+						user_id,
+						city,
+					})
+					.expect(201)
+					.expect((res) => {
+						expect(res.body).to.have.property('id')
+						expect(res.headers.location).to.eql(
+							`/api/address/${res.body.id}`
+						)
+					})
+					.expect((res) =>
+						db('homebl_addresses')
+							.select('*')
+							.where({ id: 1 })
+							.first()
+							.then((row) => {
+								expect(row.id).to.eql(1)
+								expect(row.user_id).to.eql(
+									testUsers[0].id
+								)
+							})
+					)
+			})
+
+			const requiredFields = [
+				'address_1',
+				'city',
+				'state',
+				'zip_code',
+			]
+
+			requiredFields.forEach((field) => {
+				const newAddress = {
+					address_1: '1234 Test Avenue',
+					city: 'Denver',
+					state: 'CO',
+					zip_code: '80014',
+				}
+				it(`should resond 400 and an required error when ${field} is missing`, () => {
+					delete newAddress[field]
+
+					return supertest(app)
+						.post(`/api/address`)
+						.set(
+							'authorization',
+							helpers.makeAuthHeader(testUsers[0])
+						)
+						.send(newAddress)
+						.expect(400, {
+							error: `Missing "${field}" in request body`,
+						})
+				})
 			})
 		})
 	})
