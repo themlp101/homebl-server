@@ -31,11 +31,17 @@ const AddressServices = {
 			.then(([note]) => note)
 			.then((note) => AddressServices.getNoteById(db, note.id))
 	},
+	patchNote: (db, id, newFields) => {
+		return db('homebl_notes').where({ id }).update(newFields)
+	},
 	deleteAddress: (db, id) => {
 		return db('homebl_addresses').where({ id }).delete()
 	},
 	patchAddress: (db, id, newFields) => {
 		return db('homebl_addresses').where({ id }).update(newFields)
+	},
+	deleteNote: (db, id) => {
+		return db('homebl_notes').where({ id }).delete()
 	},
 }
 

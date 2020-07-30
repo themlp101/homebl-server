@@ -8,6 +8,7 @@ const { NODE_ENV } = require('./config')
 const logger = require('./logger')
 const authRouter = require('./auth/auth-router')
 const addressRouter = require('./addresses/address-router')
+const notesRouter = require('./notes/notes-router')
 
 const app = express()
 
@@ -26,6 +27,7 @@ app.use(helmet())
 
 app.use(`/api/auth`, authRouter)
 app.use(`/api/address`, addressRouter)
+app.use(`/api/notes`, notesRouter)
 
 // app.use(function validateBearerToken(req, res, next) {
 // 	const apiToken = process.env.API_TOKEN
