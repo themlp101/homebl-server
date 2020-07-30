@@ -34,6 +34,9 @@ const AddressServices = {
 	deleteAddress: (db, id) => {
 		return db('homebl_addresses').where({ id }).delete()
 	},
+	patchAddress: (db, id, newFields) => {
+		return db('homebl_addresses').where({ id }).update(newFields)
+	},
 }
 
 module.exports = AddressServices

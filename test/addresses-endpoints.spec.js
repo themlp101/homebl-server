@@ -301,7 +301,7 @@ describe('Addressess Endpoint', () => {
 				.expect(400, { error: `Content is required` })
 		})
 	})
-	describe.only('DELETE /api/address/:address_id', () => {
+	describe('DELETE /api/address/:address_id', () => {
 		beforeEach(() =>
 			helpers.seedAddressesTable(
 				db,
@@ -333,6 +333,46 @@ describe('Addressess Endpoint', () => {
 						)
 						.expect(expectedAddresses)
 				)
+		})
+	})
+	describe('PATCH /api/address/:address_id', () => {
+		beforeEach(() =>
+			helpers.seedAddressesTable(
+				db,
+				testUsers,
+				testAddresses,
+				testNotes
+			)
+		)
+
+		it('should respond 204 and the note is updated', async () => {
+			const { id } = testAddresses[0]
+			const newFields = {
+				address_1: `00123 New Address Drive`,
+				city: 'Milwaulkee',
+				state: 'WI',
+			}
+			const expectedAddress = {
+				...testAddresses[0],
+				...newFields,
+			}
+			return await supertest(app)
+				.patch(`/api/address/${id}`)
+				.set(
+					'authorization',
+					helpers.makeAuthHeader(testUsers[0])
+				)
+				.send(newFields)
+				.expect(204)
+				.then(() => {
+					return supertest(app)
+						.get(`/api/address/${id}`)
+						.set(
+							'authorization',
+							helpers.makeAuthHeader(testUsers[0])
+						)
+						.expect(expectedAddress)
+				})
 		})
 	})
 })

@@ -1,8 +1,8 @@
 const express = require('express')
 const { requireAuth } = require('../middleware/jwt-auth')
-const AuthService = require('../auth/auth-service')
 const AddressServices = require('./address-services')
 const path = require('path')
+
 const addressRouter = express.Router()
 const jsonParser = express.json()
 
@@ -73,8 +73,10 @@ addressRouter
 			)
 			res.status(201)
 				.location(
-					`${req.originalUrl}
-						/${postedAddress.id}`
+					path.posix.join(
+						req.originalUrl,
+						`/${postedAddress.id}`
+					)
 				)
 				.json(postedAddress)
 		} catch (error) {
@@ -102,7 +104,7 @@ addressRouter
 			next(error.message)
 		}
 	})
-	.patch(async (req, res, next) => {
+	.patch(jsonParser, async (req, res, next) => {
 		try {
 			const {
 				address_1,
@@ -113,6 +115,7 @@ addressRouter
 				zip_code,
 			} = req.body
 			const { address_id } = req.params
+
 			const newFields = {
 				address_1,
 				address_2,
@@ -121,13 +124,13 @@ addressRouter
 				state,
 				zip_code,
 			}
-			const response = await AddressServices.patchAddress(
+			await AddressServices.patchAddress(
 				req.app.get('db'),
 				address_id,
 				newFields
 			)
 
-			res.status(201).json(response)
+			res.status(204).end()
 		} catch (error) {
 			next(error.message)
 		}
