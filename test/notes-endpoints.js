@@ -109,7 +109,7 @@ describe('Addressess Endpoint', () => {
 						})
 				)
 		})
-		it.only('should respond 400 if content is empty', () => {
+		it('should respond 400 if content is empty', () => {
 			const { id } = testNotes[0]
 			const newField = {
 				content: '',
