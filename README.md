@@ -1,17 +1,19 @@
-# Express Boilerplate
-
-This is a boilerplate project used for starting a new project using Express
+# Homebl - Server
 
 ## Setup
 
-Complete the following steps to start a new project (NEW-PROJECT-NAME):
+Complete the following steps to start a new server:
 
-1. Clone this repository to your local machine `git clone BOILERPLATE-URL NEW-PROJECTS-NAME`
+1. Clone this repository to your local machine `git clone URL NEW-PROJECTS-NAME`
 2. `cd` into the cloned repository
 3. Make a fresh start of the git history for this project with `rm -rf .git && git init`
-4. Install the node dependencies `npm install`, such as mocha, nodemon, supertest, chaie, etc
-5. Move the example Environment file to `.env` that will be ignored by git and read by the express server `mv example.env .env`
-6. Edit the contents of the `package.json` to use NEW-PROJECT-NAME instead of `"name": "express-boilerplate",`
+4. Install the node dependencies `npm install`
+5. Install Developer Dependencies `npm install chai postgrator-cli@3.2.0 mocha supertest`
+6. Force `pg@7.12.x` for migration stability `npm install pg@7.12.x`
+7. Create database `createdb DATABASENAME`
+8. Run migrate script to create tables `npm run migrate` for tests `npm run migrate:test`
+9. Seed tables `psql -U -d -f ./seeds/seed.homebl_tables.sql`
+10. Update database url in the `.env`
 
 ## Scripts
 
