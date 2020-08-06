@@ -20,31 +20,26 @@ app.use(
 		skip: () => NODE_ENV === 'test',
 	})
 )
-
+/**
+ *
+ * Middleware set up
+ *
+ */
 app.use(morgan(morganOption))
 app.use(express.json())
 app.use(cors())
 app.use(helmet())
-
+/**
+ * Routes
+ *
+ */
 app.use(`/api/auth`, authRouter)
 app.use(`/api/address`, addressRouter)
 app.use(`/api/notes`, notesRouter)
 app.use(`/api/users`, usersRouter)
-
-// app.use(function validateBearerToken(req, res, next) {
-// 	const apiToken = process.env.API_TOKEN
-// 	const authToken = req.get('Authorization')
-
-// 	if (!authToken || authToken.split(' ')[1] !== apiToken) {
-// 		logger.error(`Unauthorized request to path: ${req.path}`)
-// 		return res.status(401).json({ error: 'Unauthorized request' })
-// 	}
-// 	// move to the next middleware
-// 	next()
-// })
-
-app.get('/', (req, res) => res.send('Hello, world!'))
-
+/**
+ * Error handling middleware
+ */
 // eslint-disable-next-line no-unused-vars
 app.use((error, req, res, _next) => {
 	let response

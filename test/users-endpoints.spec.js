@@ -50,6 +50,7 @@ describe('Users endpoints', () => {
 				const userShortPassword = {
 					user_name: 'TestUser',
 					password: '1234',
+					full_name: 'test user',
 				}
 				return supertest(app)
 					.post(`/api/users`)
@@ -62,6 +63,7 @@ describe('Users endpoints', () => {
 				const userLongPassword = {
 					user_name: 'TestUser',
 					password: '*'.repeat(73),
+					full_name: 'test user',
 				}
 				return supertest(app)
 					.post(`/api/users`)
@@ -76,6 +78,7 @@ describe('Users endpoints', () => {
 				const userInvalidUser = {
 					user_name: 'TestUser',
 					password: '  existy',
+					full_name: 'test user',
 				}
 				return supertest(app)
 					.post(`/api/users`)
@@ -88,6 +91,7 @@ describe('Users endpoints', () => {
 				const duplicateUser = {
 					user_name: testUser.user_name,
 					password: 'testPassword',
+					full_name: 'test user',
 				}
 				return supertest(app)
 					.post(`/api/users`)
@@ -95,7 +99,7 @@ describe('Users endpoints', () => {
 					.expect(400, { error: `Username already taken` })
 			})
 		})
-		context.only('Happy path', () => {
+		context('Happy path', () => {
 			it('should respond 201 with password bcrypted', () => {
 				const newUser = {
 					user_name: 'TestUser',

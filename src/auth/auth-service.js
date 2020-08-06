@@ -2,28 +2,48 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const config = require('../config')
 const xss = require('xss')
-
+/**
+ * @param {database connection} db - 'homebl' database knex connection
+ */
 const AuthService = {
+	/**
+	 * retrieves user from the database
+	 */
 	getUser: (db, user_name) => {
 		return db(`homebl_users`).where({ user_name }).first()
 	},
+	/**
+	 * compares encrypted password with request password
+	 */
 	comparePasswords: (password, hash) => {
 		return bcrypt.compare(password, hash)
 	},
+	/**
+	 * creates token from the request password, returns the user_name as the subject
+	 */
 	createJwt: (subject, payload) => {
 		return jwt.sign(payload, config.JWT_SECRET, {
 			subject,
 			algorithm: 'HS256',
 		})
 	},
+	/**
+	 * verify token against 'jwt secret'
+	 */
 	verifyJwt: (token) => {
 		return jwt.verify(token, config.JWT_SECRET, {
 			algorithms: ['HS256'],
 		})
 	},
+	/**
+	 * parses request token
+	 */
 	parstBasicToken: (token) => {
 		return Buffer.from(token, 'base64').toString().split(':')
 	},
+	/**
+	 * return false if the user does not exist, true if the user does exist
+	 */
 	doesUserExist: (db, user_name) => {
 		return db('homebl_users')
 			.where({ user_name })
@@ -36,6 +56,9 @@ const AuthService = {
 			.returning('*')
 			.then(([user]) => user)
 	},
+	/**
+	 * xss defense
+	 */
 	serializeUser: (user) => {
 		return {
 			id: user.id,

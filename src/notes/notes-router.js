@@ -4,8 +4,13 @@ const AddressServices = require('../addresses/address-services')
 
 const notesRouter = express.Router()
 const jsonParser = express.json()
-
-const checkIfAddressExists = async (req, res, next) => {
+/**
+ *
+ * @param {promise} req - using params from the HTTP request url
+ * @param {promise} res - HTTP response body
+ * @callback next - calls next middleware
+ */
+const checkIfNoteExists = async (req, res, next) => {
 	try {
 		const { note_id } = req.params
 		const note = await AddressServices.getNoteById(
@@ -13,6 +18,7 @@ const checkIfAddressExists = async (req, res, next) => {
 			note_id
 		)
 		if (!note)
+			// if no note is found send a response message
 			return res.status(404).send({
 				error: `Note with id:${note_id} not found`,
 			})
@@ -22,11 +28,18 @@ const checkIfAddressExists = async (req, res, next) => {
 		next(error)
 	}
 }
+/**
+ * Notes router for '/:note_id' route
+ * /GET /DELETE /PATCH
+ */
 notesRouter
 	.route(`/:note_id`)
 	.all(requireAuth)
-	.all(checkIfAddressExists)
-	.get((req, res, next) => {
+	.all(checkIfNoteExists)
+	.get((req, res) => {
+		/**
+		 * Note is found in 'checkIfNoteExists' middeware
+		 */
 		res.json(res.note)
 	})
 	.delete(async (req, res, next) => {
@@ -42,19 +55,28 @@ notesRouter
 			next(error.message)
 		}
 	})
+	/**
+	 * Content is expected in the HTTP request body
+	 */
 	.patch(jsonParser, async (req, res, next) => {
-		const { note_id } = req.params
-		const { content } = req.body
-		const newFields = { content }
-		if (!content || content.trim().startsWith(' '))
-			return res.status(400).json({ error: `Content required` })
+		try {
+			const { note_id } = req.params
+			const { content } = req.body
+			const newFields = { content }
+			if (!content || content.trim().startsWith(' '))
+				return res
+					.status(400)
+					.json({ error: `Content required` })
 
-		await AddressServices.patchNote(
-			req.app.get('db'),
-			note_id,
-			newFields
-		)
-		res.sendStatus(204)
+			await AddressServices.patchNote(
+				req.app.get('db'),
+				note_id,
+				newFields
+			)
+			res.sendStatus(204)
+		} catch (error) {
+			next(error.message)
+		}
 	})
 
 module.exports = notesRouter
