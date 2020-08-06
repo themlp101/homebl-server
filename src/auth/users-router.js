@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 const express = require('express')
 const AuthService = require('./auth-service')
 const path = require('path')
@@ -23,6 +24,7 @@ usersRouter.route('/').post(jsonParser, async (req, res, next) => {
 		/**
 		 * Checks if keys are appropriate or if missing
 		 */
+
 		for (const [key, value] of Object.entries(newUser))
 			if (value == null)
 				return res.status(400).json({

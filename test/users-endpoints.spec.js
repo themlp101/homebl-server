@@ -1,6 +1,5 @@
 const knex = require('knex')
 const app = require('../src/app')
-const jwt = require('jsonwebtoken')
 const supertest = require('supertest')
 const helpers = require('./helpers/test-helpers')
 const bcrypt = require('bcryptjs')
@@ -140,6 +139,7 @@ describe('Users endpoints', () => {
 										row.password
 									)
 								} catch (error) {
+									// eslint-disable-next-line no-console
 									console.log(error.message)
 								}
 							})
